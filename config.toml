@@ -1,0 +1,16 @@
+[proto.rtmp]
+listen = "127.0.0.1:1935"
+band_width = 5000000
+
+[proto.ws]
+listen = "127.0.0.1:8080"
+max_send_queue = 5
+max_message_size = 50000
+max_frame_size = 5000
+accept_unmasked_frames = true
+
+[log]
+# log level
+#
+# An enum representing the available verbosity levels of the logger.
+level = "info"

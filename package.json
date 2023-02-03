@@ -1,0 +1,9 @@
+{
+    "name": "media-server",
+    "version": "1.0.0",
+    "scripts": {
+        "fmt": "cargo +nightly fmt",
+        "dev": "cargo run -- --config=./config.toml",
+        "release": "cargo build --release"
+    }
+}
