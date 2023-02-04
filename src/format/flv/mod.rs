@@ -21,7 +21,7 @@ impl Flv {
             header,
         }
     }
-
+    
     pub fn encode(
         &mut self,
         frame: Frame,

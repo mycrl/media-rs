@@ -6,6 +6,11 @@ use std::{
     sync::Arc,
 };
 
+use std::task::{
+    Context,
+    Poll,
+};
+
 use tokio::sync::{
     RwLock,
     mpsc::*,
@@ -80,6 +85,29 @@ pub struct WriterState {
     metadata: bool,
 }
 
+impl WriterState {
+    pub fn in_keyframe(&mut self, frame: Frame) -> bool {
+        // The head of the flv needs media information frames and the audio and
+        // video frames of the head, so here we check whether the information
+        // has been written into the internal cache.
+        match frame {
+            Frame::Script if !self.metadata => {
+                self.metadata = true;
+                true
+            },
+            Frame::Video if !self.video => {
+                self.video = true;
+                true
+            },
+            Frame::Audio if !self.audio => {
+                self.audio = true;
+                true
+            },
+            _ => false,
+        }
+    }
+}
+
 pub struct Writer {
     failed_txs: Vec<SocketAddr>,
     keyframes: Arc<RwLock<KeyFrame>>,
@@ -115,28 +143,9 @@ impl Writer {
             bytes,
         };
 
-        // The head of the flv needs media information frames and the audio and
-        // video frames of the head, so here we check whether the information
-        // has been written into the internal cache.
-        let in_keyframe = match frame {
-            Frame::Script if !self.state.metadata => {
-                self.state.metadata = true;
-                true
-            },
-            Frame::Video if !self.state.video => {
-                self.state.video = true;
-                true
-            },
-            Frame::Audio if !self.state.audio => {
-                self.state.audio = true;
-                true
-            },
-            _ => false,
-        };
-
         // If these key frames are not passed to the channel, they are recorded
         // in the internal cache Can.
-        if in_keyframe {
+        if self.state.in_keyframe(frame) {
             self.keyframes
                 .write()
                 .await
@@ -194,5 +203,22 @@ impl Reader {
         } = self.inner.recv().await?;
         self.flv.encode(frame, timestamp, &bytes);
         Some(self.flv.flush_to())
+    }
+
+    pub fn poll_read(&mut self, cx: &mut Context<'_>) -> Poll<Option<Vec<u8>>> {
+        let Payload {
+            bytes,
+            frame,
+            timestamp,
+        } = match self.inner.poll_recv(cx) {
+            Poll::Pending => return Poll::Pending,
+            Poll::Ready(res) => match res {
+                None => return Poll::Ready(None),
+                Some(p) => p,
+            },
+        };
+
+        self.flv.encode(frame, timestamp, &bytes);
+        Poll::Ready(Some(self.flv.flush_to()))
     }
 }

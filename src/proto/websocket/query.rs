@@ -7,7 +7,7 @@ pub struct Query {
     pub key: String,
 }
 
-impl Query {
+impl Query {    
     pub fn from_str(src: &str) -> Result<Self> {
         let querys = parse(src);
         Ok(Self {

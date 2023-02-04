@@ -21,10 +21,10 @@ A rust-implemented media server, the project does not introduce complex features
 
 ### What stage is the project at now?
 
-Only supports rtmp push to websocket flv, currently this project is in the early development stage, and only implements the basic media server framework.
+Only supports rtmp push to websocket/http flv, currently this project is in the early development stage, and only implements the basic media server framework.
 
 
-### Next?
+### next?
 
 In order to make this project sustainable and reduce complexity, I will introduce ffmpeg to help me process the conversion of media container packages, or if there is a need for subsequent audio and video encoding conversion, I will also use ffmpeg for processing.
 
@@ -34,7 +34,7 @@ I hope this project can support rtmp, http flv, websocket flv, rtsp, hls, dash, 
 ### Do you want to try?
 
 ```bash
-cargo run --release -- --config=./config.toml
+cargo run --release -- --config=./media-server.toml
 ```
 
 Regarding the configuration file, there is currently no more descriptive information;
@@ -50,6 +50,10 @@ max_send_queue = 5
 max_message_size = 50000
 max_frame_size = 5000
 accept_unmasked_frames = true
+
+[proto.http_flv]
+listen = "127.0.0.1:8081"
+allow_origin = "*"
 
 [log]
 level = "info"

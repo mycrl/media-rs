@@ -1,4 +1,5 @@
-mod websocket;
+mod websocket_flv;
+mod http_flv;
 mod rtmp;
 
 use std::sync::Arc;
@@ -12,11 +13,16 @@ pub fn run(cfg: Arc<Config>) {
 
     if let Some(cfg) = &cfg.proto.rtmp {
         tokio::spawn(rtmp::run(cfg.clone(), router.clone()));
-        log::info!("rtmp server listen: {}", cfg.listen);
+        log::info!("rtmp server listening: {}", cfg.listen);
     }
 
-    if let Some(cfg) = &cfg.proto.ws {
-        tokio::spawn(websocket::run(cfg.clone(), router));
-        log::info!("websocket server listen: {}", cfg.listen);
+    if let Some(cfg) = &cfg.proto.websocket_flv {
+        tokio::spawn(websocket_flv::run(cfg.clone(), router.clone()));
+        log::info!("websocket flv server listening: {}", cfg.listen);
+    }
+
+    if let Some(cfg) = &cfg.proto.http_flv {
+        tokio::spawn(http_flv::run(cfg.clone(), router));
+        log::info!("http flv server listening: {}", cfg.listen);
     }
 }

@@ -25,19 +25,22 @@ impl Rtmp {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct Ws {
-    #[serde(default = "Ws::listen")]
+pub struct WebSocketFlv {
+    #[serde(default = "WebSocketFlv::listen")]
     pub listen: SocketAddr,
+
     /// The size of the send queue. You can use it to turn on/off the
     /// backpressure features. None means here that the size of the queue is
     /// unlimited. The default value is the unlimited queue.
     #[serde(default)]
     pub max_send_queue: Option<usize>,
+
     /// The maximum size of a message. None means no size limit. The default
     /// value is 64 MiB which should be reasonably big for all normal use-cases
     /// but small enough to prevent memory eating by a malicious user.
     #[serde(default)]
     pub max_message_size: Option<usize>,
+
     /// The maximum size of a single message frame. None means no size limit.
     /// The limit is for frame payload NOT including the frame header. The
     /// default value is 16 MiB which should be reasonably big for all normal
@@ -45,6 +48,7 @@ pub struct Ws {
     /// user.
     #[serde(default)]
     pub max_frame_size: Option<usize>,
+
     /// When set to true, the server will accept and handle unmasked frames
     /// from the client. According to the RFC 6455, the server must close the
     /// connection to the client in such cases, however it seems like there are
@@ -55,7 +59,7 @@ pub struct Ws {
     pub accept_unmasked_frames: bool,
 }
 
-impl Ws {
+impl WebSocketFlv {
     fn listen() -> SocketAddr {
         "127.0.0.1:8080".parse().unwrap()
     }
@@ -70,10 +74,34 @@ impl Ws {
     }
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub struct HttpFlv {
+    #[serde(default = "HttpFlv::listen")]
+    pub listen: SocketAddr,
+
+    /// Set the value of the Access-Control-Allow-Origin header.
+    ///
+    /// Access-Control-Allow-Origin is a header request that states whether the
+    /// response is shared with requesting code.
+    #[serde(default = "HttpFlv::allow_origin")]
+    pub allow_origin: String,
+}
+
+impl HttpFlv {
+    fn listen() -> SocketAddr {
+        "127.0.0.1:8080".parse().unwrap()
+    }
+
+    fn allow_origin() -> String {
+        "*".to_string()
+    }
+}
+
 #[derive(Deserialize, Debug, Default)]
 pub struct Proto {
     pub rtmp: Option<Rtmp>,
-    pub ws: Option<Ws>,
+    pub websocket_flv: Option<WebSocketFlv>,
+    pub http_flv: Option<HttpFlv>,
 }
 
 #[derive(Deserialize, Debug)]
