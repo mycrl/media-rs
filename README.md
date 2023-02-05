@@ -44,7 +44,7 @@ Regarding the configuration file, there is currently no more descriptive informa
 listen = "127.0.0.1:1935"
 band_width = 5000000
 
-[proto.ws]
+[proto.websocket_flv]
 listen = "127.0.0.1:8080"
 max_send_queue = 5
 max_message_size = 50000
