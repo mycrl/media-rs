@@ -1,6 +1,6 @@
 <!--lint disable no-literal-urls-->
 <div align="center">
-  <h1>MediaServer-RS</h1>
+  <h1>media-server.rs</h1>
 </div>
 <br/>
 <div align="center">
