@@ -1,17 +1,11 @@
-use tokio_tungstenite::tungstenite::Message;
-use futures_util::sink::SinkExt;
-use anyhow::Result;
-use tokio::net::*;
-use std::{
-    net::SocketAddr,
-    sync::Arc,
-};
+use std::{net::SocketAddr, sync::Arc};
 
-use crate::{
-    config::WebSocketFlv,
-    proto::websocket::*,
-    router::*,
-};
+use crate::{config::WebSocketFlv, proto::websocket::*, router::*};
+
+use anyhow::Result;
+use futures_util::sink::SinkExt;
+use tokio::net::{TcpListener, TcpStream};
+use tokio_tungstenite::tungstenite::Message;
 
 async fn fork_socket(
     addr: SocketAddr,
@@ -19,17 +13,14 @@ async fn fork_socket(
     router: Arc<Router>,
     socket: TcpStream,
 ) {
-    if let Ok((mut stream, query)) =
-        accept(socket, Some(cfg.get_config())).await
-    {
+    if let Ok((mut stream, query)) = accept(socket, Some(cfg.get_config())).await {
         log::info!(
             "websocket flv connection name: {}, key: {}",
             query.name,
             query.key
         );
 
-        if let Some(mut reader) = router.get_receiver(&addr, &query.name).await
-        {
+        if let Some(mut reader) = router.get_receiver(&addr, &query.name).await {
             while let Some(buf) = reader.read().await {
                 if stream.send(Message::Binary(buf)).await.is_err() {
                     break;

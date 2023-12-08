@@ -1,14 +1,11 @@
-mod server;
-mod format;
 mod config;
-mod router;
+mod flv;
 mod proto;
+mod router;
+mod server;
 
 use config::Config;
-use std::{
-    future::pending,
-    sync::Arc,
-};
+use std::{future::pending, sync::Arc};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

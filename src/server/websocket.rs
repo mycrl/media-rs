@@ -1,17 +1,10 @@
-use tokio_tungstenite::tungstenite::Message;
-use futures_util::sink::SinkExt;
-use anyhow::Result;
-use tokio::net::*;
-use std::{
-    net::SocketAddr,
-    sync::Arc,
-};
+use std::{net::SocketAddr, sync::Arc};
 
-use crate::{
-    proto::websocket::*,
-    router::*,
-    config,
-};
+use crate::{proto::websocket::*,router::*,config,};
+
+use anyhow::Result;
+use futures_util::sink::SinkExt;
+use tokio_tungstenite::tungstenite::Message;
 
 async fn fork_socket(
     addr: SocketAddr,

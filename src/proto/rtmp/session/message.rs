@@ -1,9 +1,7 @@
 use std::collections::HashMap;
+
 use rml_rtmp::messages::*;
-use rml_rtmp::rml_amf0::{
-    Amf0Value::*,
-    Amf0Value,
-};
+use rml_rtmp::rml_amf0::{Amf0Value, Amf0Value::*};
 
 pub enum Msg {
     WindowAcknowledgement,
@@ -15,9 +13,7 @@ pub enum Msg {
 
 impl Msg {
     fn window_acknowledgement() -> RtmpMessage {
-        RtmpMessage::WindowAcknowledgement {
-            size: 5000000,
-        }
+        RtmpMessage::WindowAcknowledgement { size: 5000000 }
     }
 
     fn set_peer_bandwidth() -> RtmpMessage {

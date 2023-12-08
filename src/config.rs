@@ -1,10 +1,8 @@
-use tokio_tungstenite::tungstenite::protocol::*;
-use serde::Deserialize;
+use std::net::SocketAddr;
+
 use clap::Parser;
-use std::{
-    net::SocketAddr,
-    fs::*,
-};
+use serde::Deserialize;
+use tokio_tungstenite::tungstenite::protocol::*;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Rtmp {
@@ -169,7 +167,7 @@ impl Config {
         toml::from_str(
             &Cli::parse()
                 .config
-                .and_then(|path| read_to_string(path).ok())
+                .and_then(|path| std::fs::read_to_string(path).ok())
                 .unwrap_or("".to_string()),
         )
         .unwrap()

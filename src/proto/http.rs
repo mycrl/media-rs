@@ -1,23 +1,18 @@
-use axum::http::HeaderMap;
-use http_body::Body;
-use bytes::Bytes;
-use crate::router;
+use crate::router::RouterReceiver;
 
-use std::{
-    task::Context,
-    task::Poll,
-    pin::Pin,
-};
+use std::{pin::Pin, task::Context, task::Poll};
+
+use axum::http::HeaderMap;
+use bytes::Bytes;
+use http_body::Body;
 
 pub struct Stream {
-    reader: router::Reader,
+    receiver: RouterReceiver,
 }
 
 impl Stream {
-    pub fn new(reader: router::Reader) -> Self {
-        Self {
-            reader,
-        }
+    pub fn new(receiver: RouterReceiver) -> Self {
+        Self { receiver }
     }
 }
 
@@ -29,11 +24,9 @@ impl Body for Stream {
         mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
     ) -> Poll<Option<Result<Self::Data, Self::Error>>> {
-        match self.as_mut().reader.poll_read(cx) {
+        match self.as_mut().receiver.poll_read(cx) {
             Poll::Pending => Poll::Pending,
-            Poll::Ready(res) => {
-                Poll::Ready(res.and_then(|b| Some(Ok(Bytes::from(b)))))
-            },
+            Poll::Ready(res) => Poll::Ready(res.and_then(|b| Some(Ok(Bytes::from(b))))),
         }
     }
 

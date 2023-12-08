@@ -1,16 +1,14 @@
 mod session;
 
-use std::borrow::Cow;
-use async_trait::*;
+use async_trait::async_trait;
 use bytes::Bytes;
-use session::*;
-use rml_rtmp::{
-    handshake::HandshakeProcessResult::*,
-    handshake::*,
-};
+use rml_rtmp::{handshake::HandshakeProcessResult::*, handshake::*};
+use std::borrow::Cow;
+
+use self::session::Session;
 
 #[async_trait]
-pub trait Observer: Send {
+pub trait RtmpObserver: Send + Sync {
     async fn guard(&mut self, app: &str, key: &str);
     async fn data_frame(&mut self, buf: Bytes);
     async fn audio_data(&mut self, timestamp: u32, buf: Bytes);
@@ -26,7 +24,7 @@ pub struct Rtmp {
 impl Rtmp {
     pub fn new<T>(observer: T) -> Self
     where
-        T: Observer + 'static,
+        T: RtmpObserver + 'static,
     {
         Self {
             handshake_state: false,
@@ -41,9 +39,7 @@ impl Rtmp {
 
         if !self.handshake_state {
             match self.handshake.process_bytes(&buf)? {
-                InProgress {
-                    response_bytes,
-                } => return Ok(response_bytes),
+                InProgress { response_bytes } => return Ok(response_bytes),
                 Completed {
                     // Any bytes that should be sent to the peer as a response.
                     response_bytes,
@@ -53,7 +49,7 @@ impl Rtmp {
                     bytes.extend_from_slice(&response_bytes);
                     buf = remaining_bytes.into();
                     self.handshake_state = true;
-                },
+                }
             }
         }
 
